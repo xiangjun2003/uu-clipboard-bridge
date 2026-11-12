@@ -1,0 +1,9 @@
+pairing.json
+*.tar.gz
+pasteboard
+__pycache__/
+config.json
+*.log
+*.error.log
+.DS_Store
+.venv/
