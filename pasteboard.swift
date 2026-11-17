@@ -12,8 +12,6 @@ func emit(_ value: [String: Any]) {
 func capture() -> [String: Any]? {
     let names = Set((board.types ?? []).map { $0.rawValue })
     if !names.isDisjoint(with: ["org.nspasteboard.ConcealedType", "org.nspasteboard.TransientType"]) { return nil }
-    // File references are deliberately excluded: only actual image/text bytes travel.
-    if names.contains("public.file-url") { return nil }
     if let bytes = board.data(forType: .png), bytes.count <= limit {
         return ["type": "image", "data": bytes.base64EncodedString()]
     }
@@ -22,6 +20,8 @@ func capture() -> [String: Any]? {
        let png = bitmap.representation(using: .png, properties: [:]), png.count <= limit {
         return ["type": "image", "data": png.base64EncodedString()]
     }
+    // Some apps offer an embedded image alongside a file URL. Never open the file.
+    if names.contains("public.file-url") { return nil }
     if let text = board.string(forType: .string), text.utf8.count <= limit {
         return ["type": "text", "data": Data(text.utf8).base64EncodedString()]
     }
