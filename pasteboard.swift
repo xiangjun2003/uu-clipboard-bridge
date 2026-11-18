@@ -68,7 +68,18 @@ let timer = Timer.scheduledTimer(withTimeInterval: 0.35, repeats: true) { _ in
     let now = board.changeCount
     if now != last {
         last = now
-        if var v = capture() { v["kind"] = "clipboard"; emit(v) }
+        if var v = capture() {
+            // WeChat advertises both an image and a file. UU may forward the file
+            // separately, replacing the destination image with an empty placeholder.
+            if v["type"] as? String == "image",
+               board.types?.contains(.fileURL) == true,
+               board.types?.contains(NSPasteboard.PasteboardType("com.trolltech.anymime.application--x-qt-image")) == true,
+               board.changeCount == now {
+                _ = apply(v)
+            }
+            v["kind"] = "clipboard"
+            emit(v)
+        }
     }
 }
 emit(["kind": "ready"])
